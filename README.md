@@ -11,6 +11,7 @@ An opt-in, durable red-team runtime for Codex App and Codex CLI. It compiles eac
 ## Usage Instructions
 
 Before using this project, you should read the [README](./README_ZH.md) file completely to prevent any issues during use.
+If you're a beginner, please read the [GUIDE](./GUIDE.md) file completely to avoid any unnecessary trouble while using it.
 
 ### Models and System Prompts
 
@@ -18,7 +19,7 @@ The installer composes the user's prior instructions, `instruction.ctf.md`, and 
 
 ### Asking Questions Wisely
 
-1. If you have questions about the content in the **README**, you should submit an **ISSUE**, including the corresponding content from the **README** to seek help, or ask in the **WeChat group** in the same way.
+1. If you have questions about the content in the **README**, you should submit an **ISSUE**, including the corresponding content from the **README** to seek help, or ask in the **QQ group** in the same way.
 
    Do:
    ```text
@@ -29,7 +30,7 @@ The installer composes the user's prior instructions, `instruction.ctf.md`, and 
    Why is it different when I open it compared to the video?
    ```
 
-2. If you have suggestions or ideas for maintaining the project, you can `submit an ISSUE`, `submit a Pull Request`, or `suggest in the WeChat group`.
+2. If you have suggestions or ideas for maintaining the project, you can `submit an ISSUE`, `submit a Pull Request`, or `suggest in the QQ group`.
 
    Do:
    ```text
@@ -39,6 +40,9 @@ The installer composes the user's prior instructions, `instruction.ctf.md`, and 
    ```text
    Can we add a plugin/feature for cracking keys?
    ```
+
+### QQ Group
+805865662
 
 ### Operating Boundary
 
