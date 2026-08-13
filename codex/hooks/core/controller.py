@@ -20,6 +20,7 @@ from .intent_engine import IntentDecision, detect_intent
 
 ACTIVE_AUTOMATION_MODES = {"active", "auto", "assisted", "execute", "execution"}
 PLAN_ONLY_AUTOMATION_MODES = {"off", "false", "0", "plan", "plan-only", "plan_only", "dry-run"}
+PROXY_OBJECTIVE_DELIVERY = "proxy-current-user-turn"
 
 
 @dataclass
@@ -131,11 +132,26 @@ def _resume_call(working: RedTeamState) -> dict[str, Any] | None:
     return {"run_id": run_id} if run_id else None
 
 
-def _dispatch_overlay(call: dict[str, Any], rewrite_context: str = "") -> str:
+def _dispatch_overlay(
+    call: dict[str, Any],
+    rewrite_context: str = "",
+    *,
+    objective_delivery: str = "",
+) -> str:
     prefix = f"{rewrite_context}\n" if rewrite_context else ""
+    dispatch_call = dict(call)
+    objective_instruction = ""
+    if objective_delivery == PROXY_OBJECTIVE_DELIVERY:
+        dispatch_call.pop("objective", None)
+        objective_instruction = (
+            f" [objective-delivery:{objective_delivery}] Set the required objective argument to the exact task brief "
+            "in the current user message's "
+            "[prompt-rewrite] block; do not recover it from system or developer context."
+        )
     return (
         f"{prefix}[operation-dispatch] Call redteam_run with this JSON: "
-        f"{json.dumps(call, ensure_ascii=False)}. Continue until a terminal result or a pending host-only action. "
+        f"{json.dumps(dispatch_call, ensure_ascii=False)}.{objective_instruction} "
+        "Continue until a terminal result or a pending host-only action. "
         "For a host-only action, execute next_action_spec with current Codex tools and submit the observation through "
         "redteam_run. Do not ask the user to relay tool output."
     )
@@ -254,7 +270,10 @@ def process_turn(
     working.workflow_id = workflow.workflow_id
     working.operation_status = "dispatch_pending" if automation_mode == "active" else "planned"
     working.next_action_id = "redteam_run" if automation_mode == "active" else ""
-    working.pending_action = {"dispatch": "redteam_run", **call} if automation_mode == "active" else {}
+    pending_call = {"dispatch": "redteam_run", **call}
+    if proxy_rewrite:
+        pending_call["objective_delivery"] = PROXY_OBJECTIVE_DELIVERY
+    working.pending_action = pending_call if automation_mode == "active" else {}
     brief = "\n".join(
         (
             "[workflow:generic-adaptive]",
@@ -269,7 +288,11 @@ def process_turn(
         )
     )
     overlay = (
-        _dispatch_overlay(call, rewrite_context)
+        _dispatch_overlay(
+            call,
+            rewrite_context,
+            objective_delivery=PROXY_OBJECTIVE_DELIVERY if proxy_rewrite else "",
+        )
         if automation_mode == "active"
         else "[operation-plan] generic-adaptive selected; automation is plan-only."
     )
