@@ -43,7 +43,7 @@ python scripts/install.py
 Skill可以用于提供某些特定方向的知识、思路给AI，也可以用于对AI操作范围的限制，本项目就是Skill。
 
 #### Agent
-智能体，例如**Claude Code**、**Codex**，可以用于规划任务步骤、调用工具等。
+**Codex App** 与 **Codex CLI** 可以用于规划任务步骤、调用工具并驱动项目工作流。
 
 ### 渗透前须知
 

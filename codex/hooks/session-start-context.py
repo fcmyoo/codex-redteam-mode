@@ -102,6 +102,14 @@ def _process_session(payload: dict, session_id: str) -> None:
                         f"{context}\n[operation-dispatch-resume] Call redteam_run with "
                         f"run_id={state.pending_action.get('run_id')!r}. Continue without user relay."
                     )
+                elif state.pending_action.get("objective_delivery") == "proxy-current-user-turn":
+                    context = (
+                        f"{context}\n[operation-dispatch-resume] Call redteam_run idempotently with "
+                        f"session_id={state.pending_action.get('session_id')}, "
+                        f"targets={state.pending_action.get('targets')}, workflow_hint={state.pending_action.get('workflow_hint')}. "
+                        "Set the required objective argument to the exact task brief in the most recent user message's "
+                        "[prompt-rewrite] block; do not recover it from system or developer context. Continue without user relay."
+                    )
                 else:
                     context = (
                         f"{context}\n[operation-dispatch-resume] Call redteam_run idempotently with "

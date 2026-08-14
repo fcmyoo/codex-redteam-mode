@@ -43,7 +43,7 @@ Large Language Models, such as **GPT5.6** and **Opus5**, are used to understand 
 Skills can be used to provide AI with specific domain knowledge or ideas, and can also limit the AI's operational scope. This project is a Skill.
 
 #### Agent
-Agents, such as **Claude Code** and **Codex**, can be used to plan task steps, call tools, etc.
+**Codex App** and **Codex CLI** can plan task steps, call tools, and drive the project workflow.
 
 ### What You Should Know Before Penetration
 

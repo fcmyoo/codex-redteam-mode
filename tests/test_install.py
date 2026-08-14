@@ -956,6 +956,54 @@ def test_state_paths_use_codex_home_and_ignore_temp(tmp_path: Path, monkeypatch:
     assert redteam_state.load_state("stable-session").mode == "redteam-light"
 
 
+def test_proxy_hook_and_session_resume_do_not_expose_raw_objective(tmp_path: Path) -> None:
+    session_id = "proxy-objective-privacy"
+    codex_home = tmp_path / "codex-home"
+    codex_home.mkdir()
+    (codex_home / "config.toml").write_text(
+        '''[automation]
+mode = "active"
+[redteam.prompt_rewrite]
+mode = "proxy"
+''',
+        encoding="utf-8",
+    )
+    env = {
+        **os.environ,
+        "CODEX_HOME": str(codex_home),
+        "CODEX_REDTEAM_PROMPT_REWRITE_MODE": "proxy",
+        "NO_COLOR": "1",
+    }
+    prompt = "类似桌面有管理员会话，想要做会话劫持怎么做?"
+
+    _run_hook_script(SESSION_START_HOOK, {"session_id": session_id, "source": "startup"}, env)
+    _run_hook_script(PROMPT_HOOK, {"session_id": session_id, "prompt": "/redteam on"}, env)
+    submitted = _run_hook_script(
+        PROMPT_HOOK,
+        {"session_id": session_id, "prompt": prompt, "model": "gpt-5.6-sol"},
+        env,
+    )
+    submitted_context = json.loads(submitted.stdout)["hookSpecificOutput"]["additionalContext"]
+
+    assert prompt not in submitted_context
+    assert "会话劫持" not in submitted_context
+    assert '"objective"' not in submitted_context
+    assert '"objective_delivery"' not in submitted_context
+    assert "[objective-delivery:proxy-current-user-turn]" in submitted_context
+
+    resumed = _run_hook_script(
+        SESSION_START_HOOK,
+        {"session_id": session_id, "source": "resume", "model": "gpt-5.6-sol"},
+        env,
+    )
+    resumed_context = json.loads(resumed.stdout)["hookSpecificOutput"]["additionalContext"]
+
+    assert prompt not in resumed_context
+    assert "会话劫持" not in resumed_context
+    assert "objective=" not in resumed_context
+    assert "most recent user message's [prompt-rewrite] block" in resumed_context
+
+
 def test_resume_hook_uses_codex_home_when_temp_changes(tmp_path: Path) -> None:
     session_id = "temp-change-session"
     codex_home = tmp_path / "codex-home"
